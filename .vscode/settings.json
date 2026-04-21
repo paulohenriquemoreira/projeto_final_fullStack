@@ -6,6 +6,8 @@
         "doacoes",
         "endereco",
         "informacoes",
+        "localizacao",
+        "relatorio",
         "saida"
     ]
 }
