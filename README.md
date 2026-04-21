@@ -1,10 +1,11 @@
+
 # 🚀 Desafio Final - Empower 5.0
 
 ## Ênfase no Back End e na construção da API para consumo no Front End.
 
-#### Este projeto foi desenvolvido a partir de um desafio sobre enchentes no Brasil. Ao analisar o cenário, identifiquei a dificuldade relacionada à falta de informação sobre abrigos, o que motivou a criação desta solução. Tendo em vista que a organização dos abrigos agiliza tanto a localização de pessoas desaparecidas quanto o esforço voluntário e as doações, este projeto tem como pilar a organização das informações e a promoção de maior agilidade na gestão de vagas em abrigos.
+#### Este projeto foi desenvolvido a partir de um desafio sobre enchentes no Brasil. Ao analisar o cenário, identifiquei a dificuldade relacionada à falta de informação sobre abrigos, além da importância de ao registrar uma pessoa desaparecida, seja pontuado caso tenha algum individuo alojado com os mesmo dados em algum abrigo, reduzindo o tempo de busca entre partentes e a pessoa desaparecida, sendo o que motivou a criação desta solução. O pilar central é a organização das informações para agilizar a localização de pessoas desaparecidas e a gestão de vagas em tempo real.
 
----
+-----
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -41,167 +42,90 @@
     />
 </p>
 
----
+-----
 
 ## ▶️ Como Rodar o Projeto
 
-Siga os passos abaixo para rodar a aplicação localmente:
+**1º Clone este repositório:**
 
-**1º Clone esse repositório:**
-
-   ```
-   git clone https://github.com/paulohenriquemoreira/projeto_final_fullStack
-
-   cd projeto_final_fullStack
-   ```
+```bash
+git clone https://github.com/paulohenriquemoreira/projeto_final_fullStack
+cd projeto_final_fullStack
+```
 
 **2º Instale as dependências:**
 
-   ```
-   npm install
-   npm install sass
-   npm install express
-   npm install sqlite3
-   npm install sqlite
-   npm install cors
-   ```
-
-**3º Inicie o servidor de desenvolvimento:**
-
-   ```
-   npm run dev
-   **Servidor rodando na porta http:localhost:3000
-   ```
----
-
-## ⚙️ Estrutura do Projeto
-
-📁 DESAFIOFINALFULLSTACK
-
-┣ 📁 .vscode
-
-┣ 📁 node_modules
-
-┣ 📄 .gitignore
-
-┣ 📄 database.db
-
-┣ 📄 database.js
-
-┣ 📄 package-lock.json
-
-┣ 📄 package.json
-
-┗ 📄 server.js
-
----
-
-
-## 🗄️ Banco de Dados
-
-O banco de dados é criado automaticamente ao iniciar o projeto
-
-```
-abrigos.db
+```bash
+npm install
 ```
 
-## 📋 Estrutura da Tabela (Paciente)
+**3º Inicie o servidor:**
 
-| Campo            | Descrição                 |
-| ---------------- | ------------------------- |
-| id               | Identificador único       |
-| nome_abrigo      | Nome Abrigo               |
-| endereco_abrigo  | Endereço do abrigo        |
-| capacidade_total | Número de máximo de vagas |
-| vagas_disponiveis| Número de vagas disponiveis |
-| aceita_pet       | Verifica se abrigo aceita pet |
-| aceita_doacoes   | Verifica se abrigo aceita doações|
-
----
-
-## 🔗 Endpoints
-
-### 📍 Rota inicial
-
-```
-GET /
+```bash
+npm run dev
 ```
 
-Retorna uma página HTML com informações da API
+> Servidor rodando em: `http://localhost:3000`
 
-### 📄 Listar Abrigos
+-----
 
-```
-GET /abrigos
-```
+## 🗄️ Estrutura do Banco de Dados
 
-### 🔍 Buscar abrigos (id)
+O banco de dados `database.db` é relacional e utiliza chaves estrangeiras para ligar pessoas a abrigos.
 
-```
-GET /abrigos/:id
-```
+### Tabela: Abrigos
 
-Ex: <code>/abrigos/1</code>
+| Campo | Descrição |
+| :--- | :--- |
+| id | Identificador único (PK) |
+| nome\_abrigo | Nome da instituição |
+| endereco\_abrigo | Localização completa |
+| capacidade\_total | Limite de ocupação |
+| vagas\_disponiveis | Vagas atuais (atualizado dinamicamente) |
+| aceita\_pet | "1" para Sim, "0" para Não |
+| data\_registro | Data de criação (Formatada DD/MM/AAAA) |
 
-### ➕ Criar cadastro de abrigo
+### Tabela: Pessoas (Desaparecidos/Abrigados)
 
-```
-POST /abrigo
-```
+| Campo | Descrição |
+| :--- | :--- |
+| id | Identificador único (PK) |
+| nome\_completo | Nome do cidadão |
+| data\_nascimento | Data de nascimento (para verificação) |
+| endereco\_residencial | Último endereço conhecido |
+| id\_abrigo | Vínculo com o abrigo (FK) |
 
-#### Body (JSON)
+-----
 
-```json
-{
-    "nome_abrigo": "Escola Municipal Esperança",
-    "endereco_abrigo": "Rua das Flores, 123 - Centro",
-    "capacidade_total": 35,
-    "vagas_disponiveis": 0,
-    "aceita_pet": "1",
-    "aceita_doacoes": "alimentos, água"
-}
-```
+## 🔗 Principais Endpoints
 
+### 🏠 Gestão de Abrigos (`/abrigos`)
 
-### ✏️ Atualizar cadastro de abrigo
+  * **POST `/abrigos`**: Registra um novo ponto de acolhimento.
+  * **GET `/abrigos`**: Lista todos os abrigos com datas formatadas.
+  * **PUT `/abrigos/:id`**: Atualiza dados de capacidade ou localização.
+  * **DELETE `/abrigos/:id`**: Remove o abrigo do sistema.
 
-```
-PUT /abrigo/:id
-```
+### 👥 Gestão de Pessoas (`/pessoas`)
 
-### ❌ Deletar cadastro de abrigo
+  * **POST `/pessoas`**: Registra uma pessoa.
+      * *Regra de Negócio*: O sistema varre todos os abrigos. Se a pessoa já estiver cadastrada, retorna o nome e o endereço do abrigo onde ela se encontra.
+      * *Automação*: Ao cadastrar, o sistema subtrai automaticamente uma vaga do abrigo correspondente.
+  * **GET `/pessoas`**: Lista pessoas com `LEFT JOIN`, exibindo em qual abrigo cada uma está localizada.
+  * **DELETE `/pessoas/:id`**: Remove o registro e devolve automaticamente a vaga ao abrigo.
 
-```
-DELETE /abrigo/:id
-```
----
+-----
 
-## 🎯 Objetivo do Projeto
+## 🧠 Inteligência do Back-End
 
-Este projeto foi desenvolvido com foco em aprendizado de Full Stack utilizando React, Sass, Node.js + Express,SQLite, Postman e boas práticas no desenvolvimento de APIs.
+  * **Validação de Duplicidade**: Comparação de `nome_completo` + `data_nascimento` em toda a base de dados.
+  * **Integridade Relacional**: Uso de `Foreign Keys` para garantir que uma pessoa esteja sempre vinculada a um abrigo válido.
+  * **Padronização Local**: Datas convertidas via SQL (`strftime`) para o padrão brasileiro **DD/MM/AAAA**.
+  * **Segurança**: Implementação de queries parametrizadas contra SQL Injection.
 
----
-
-## 🔐 Segurança
-
- A API utiliza queries parametrizadas para evitar SQL Injection:
-
-```SQL
-WHERE id = ?
-```
- ✔️ Boa prática essencial em aplicações backend
-
----
-
-## 📚 Conceitos Aplicados
-
-- React
-- Sass
-- REST API
-- CRUD (Create, Read, Update, Delete)
-- Arquitetura básica em camadas
-- Métodos HTTP (GET, POST, PUT, DELETE)
----
+-----
 
 ## 👨‍💻 Autor
- #Projeto desenvolvido para fins educacionais com foco em aprendizado em Formação Full Stack - Paulo Henrique Moreira - 2026.
+
+**Paulo Henrique Moreira** - 2026  
+*Projeto desenvolvido para fins educacionais - Formação Full Stack.*
